@@ -8,7 +8,7 @@
 <style>
 :root{--safe-left:calc(max(env(safe-area-inset-left,0px),var(--tg-safe-area-inset-left,0px)) + var(--tg-content-safe-area-inset-left,0px));--safe-bottom:calc(max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)) + var(--tg-content-safe-area-inset-bottom,0px));--safe-right:calc(max(env(safe-area-inset-right,0px),var(--tg-safe-area-inset-right,0px)) + var(--tg-content-safe-area-inset-right,0px));--safe-top:calc(max(env(safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px)) + var(--tg-content-safe-area-inset-top,0px));color-scheme:dark;--ink:#fff1d6;--soft:#d8ccb3;--gold:#e9cd92;--dark:#142820;--panel:#1b3228;--edge:#68684f;--danger:#f2a798;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#11231b;color:var(--ink)}
 *{box-sizing:border-box}body{margin:0}button,input,select{font:inherit;color:inherit}button,select{cursor:pointer}button{border:1px solid var(--edge);background:#2b4335;border-radius:9px;padding:9px 13px;min-height:42px;font-weight:550}button:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:default;filter:none}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ffe6ad;outline-offset:3px}
-.primary{background:var(--gold);border-color:var(--gold);color:#26271c}.ghost{background:#142820a0}.danger{color:var(--danger);border-color:#a87968}.icon{width:42px;height:42px;padding:0;font-size:19px;line-height:1;display:grid;place-items:center}
+.fullscreen-control{font-size:12px;white-space:nowrap}.primary{background:var(--gold);border-color:var(--gold);color:#26271c}.ghost{background:#142820a0}.danger{color:var(--danger);border-color:#a87968}.icon{width:42px;height:42px;padding:0;font-size:19px;line-height:1;display:grid;place-items:center}
 [hidden]{display:none!important}
 .shell{max-width:1080px;margin:auto;padding:max(12px,var(--safe-top)) max(16px,var(--safe-right)) max(14px,var(--safe-bottom)) max(16px,var(--safe-left))}
 .brand{font-size:11px;letter-spacing:.16em;color:var(--gold);font-weight:650}
@@ -331,6 +331,9 @@ const Poker = (() => {
   let draggedSeat = null;
   let noticeTimer;
   let modalType = '';
+  let telegramApp = null;
+  let fullscreenTimer;
+  let manualFullscreen = false;
 
   function tell(message, persistent = false) {
     clearTimeout(noticeTimer);
@@ -422,8 +425,14 @@ const Poker = (() => {
       (setup&&!host&&draft.mode==='player'?' aria-pressed="'+dealer+'"':'')+'><span class="seat-face">'+face+'</span></button>';
   }
 
+  function fullscreenControl() {
+    return control('fullscreen','⛶ Полный экран','ghost fullscreen-control',
+      telegramApp && !telegramApp.isFullscreen ? '' : 'hidden');
+  }
+
   function header(title) {
-    return '<header class="header"><div><div class="brand">♠ &nbsp; POKER COMPANION</div><h1>'+title+'</h1></div></header>';
+    return '<header class="header"><div><div class="brand">♠ &nbsp; POKER COMPANION</div><h1>'+title+'</h1></div>'+
+      fullscreenControl()+'</header>';
   }
 
   function setup() {
@@ -666,11 +675,15 @@ const Poker = (() => {
       panel='';
       persist();
       tell('Действие возвращено');
+    } else if (command==='fullscreen') {
+      dismiss();
+      requestTelegramFullscreen(true);
+      return;
     } else if (command==='menu') {
       openModal('menu','Сессия','<p class="muted">'+(state.hand?'Раздача '+state.number:'Сыграно раздач: '+state.number)+'</p>'+
         '<div class="row">'+
         control('undo','↶ Отменить','ghost',undo.length?'':'disabled')+
-        control('redo','↷ Вернуть','ghost',redo.length?'':'disabled')+'</div>'+
+        control('redo','↷ Вернуть','ghost',redo.length?'':'disabled')+fullscreenControl()+'</div>'+
         '<div class="footer">'+control('close-modal','К столу','ghost')+
         control('end-ask','Завершить сессию','danger')+'</div>');
       return;
@@ -902,23 +915,67 @@ const Poker = (() => {
     }
   });
 
+  function syncFullscreenControls() {
+    for (const button of document.querySelectorAll('[data-action="fullscreen"]')) {
+      button.hidden = !telegramApp || telegramApp.isFullscreen;
+    }
+  }
+
+  function requestTelegramFullscreen(manual = false) {
+    if (!telegramApp || telegramApp.isFullscreen) return;
+    if (!telegramApp.isVersionAtLeast?.('8.0') || !telegramApp.requestFullscreen) {
+      if (manual) tell('Для полного экрана обнови Telegram.');
+      return;
+    }
+    clearTimeout(fullscreenTimer);
+    manualFullscreen = manual;
+    if (manual) {
+      fullscreenTimer = setTimeout(() => {
+        manualFullscreen = false;
+        if (!telegramApp.isFullscreen) tell('Telegram не включил полный экран. Проверь обновления приложения.');
+      }, 1800);
+    }
+    telegramApp.requestFullscreen();
+  }
+
   function initializeTelegram() {
     const telegram = window.Telegram?.WebApp;
-    if (!telegram || telegram.platform === 'unknown') return;
+    if (!telegram || telegram.platform === 'unknown' || telegramApp) return;
+    telegramApp = telegram;
     const supports = version => telegram.isVersionAtLeast?.(version) === true;
     const refreshLayout = () => {
       if (view === 'game') window.requestAnimationFrame(() => fitTableSeats());
     };
+    telegram.onEvent?.('viewportChanged',refreshLayout);
     if (supports('8.0')) {
-      for (const event of ['fullscreenChanged','fullscreenFailed','safeAreaChanged','contentSafeAreaChanged','viewportChanged']) {
+      for (const event of ['safeAreaChanged','contentSafeAreaChanged']) {
         telegram.onEvent?.(event,refreshLayout);
       }
+      telegram.onEvent?.('fullscreenChanged',()=>{
+        clearTimeout(fullscreenTimer);
+        manualFullscreen = false;
+        syncFullscreenControls();
+        refreshLayout();
+      });
+      telegram.onEvent?.('fullscreenFailed',event=>{
+        clearTimeout(fullscreenTimer);
+        if (manualFullscreen && event?.error !== 'ALREADY_FULLSCREEN') {
+          tell(event?.error === 'UNSUPPORTED' ? 'Telegram на этом устройстве не поддерживает полный экран.' : 'Telegram не включил полный экран.');
+        }
+        manualFullscreen = false;
+        syncFullscreenControls();
+        refreshLayout();
+      });
     }
     telegram.ready?.();
     if (supports('7.7')) telegram.disableVerticalSwipes?.();
     telegram.expand?.();
-    if (supports('8.0') && !telegram.isFullscreen) telegram.requestFullscreen?.();
+    syncFullscreenControls();
     refreshLayout();
+    // Give the mobile webview time to expand after ready. Request only once per launch.
+    if (supports('8.0')) setTimeout(() => {
+      if (!manualFullscreen) requestTelegramFullscreen();
+    }, 250);
   }
 
   function loadTelegram() {
@@ -927,12 +984,7 @@ const Poker = (() => {
       return;
     }
     const launch = window.location;
-    if (!launch) return;
-    const params = new URLSearchParams(launch.hash.slice(1));
-    const query = new URLSearchParams(launch.search);
-    const fromTelegram = ['tgWebAppData','tgWebAppVersion','tgWebAppPlatform']
-      .some(key => params.has(key) || query.has(key));
-    if (!fromTelegram) return;
+    if (!launch || launch.protocol !== 'https:') return;
     const sdk = document.createElement('script');
     sdk.src = 'https://telegram.org/js/telegram-web-app.js?64';
     sdk.addEventListener('load',initializeTelegram,{once:true});

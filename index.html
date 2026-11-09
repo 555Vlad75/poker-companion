@@ -18,8 +18,8 @@ fieldset{padding:0;border:0;margin:0;min-width:0}legend{padding:0;margin-bottom:
 .card{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:16px}.narrow{max-width:590px;margin:0 auto}.error{color:var(--danger);font-size:13px;min-height:1em;margin-top:7px}
 .board{--chip:clamp(44px, min(12vw, 23dvh), 110px);position:relative;isolation:isolate;height:clamp(202px,64dvh,380px);overflow:hidden;border:6px solid #64472e;border-radius:24px;background:radial-gradient(ellipse at 50% 44%,#295e45 0%,#184333 58%,#102d23 100%);box-shadow:inset 0 0 0 1px #bd9e62,inset 0 0 32px #071c14,0 4px 18px #0004}
 .board:before{content:"";position:absolute;inset:9px;border-radius:14px;border:1px solid #d9bb7540;background:repeating-linear-gradient(45deg,#ffffff05 0 1px,transparent 1px 4px);pointer-events:none;z-index:-1}
-.game{height:100dvh;display:flex;flex-direction:column;gap:5px;padding:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))}
-.game .board{height:auto;flex:1 1 0;min-height:0;container-type:size;--chip:clamp(34px,min(13cqw,27cqh),112px);border-width:6px}
+.game{height:100dvh;padding:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))}
+.game .board{height:100%;width:100%;container-type:size;--chip:clamp(34px,min(13cqw,25cqh),112px);border-width:6px}
 .game .seat{--seat-margin:calc(var(--chip) / 2 + 3px);left:clamp(var(--seat-margin),var(--x),calc(100% - var(--seat-margin)));top:clamp(var(--seat-margin),var(--y),calc(100% - var(--seat-margin)))}
 .game .balance{font-size:clamp(15px,calc(var(--chip)*.43),48px)}.game .balance.long{font-size:clamp(12px,calc(var(--chip)*.31),34px)}
 .game .wager,.game .seat-id{font-size:clamp(8px,calc(var(--chip)*.16),14px)}
@@ -35,58 +35,42 @@ fieldset{padding:0;border:0;margin:0;min-width:0}legend{padding:0;margin-bottom:
 .marks{position:absolute;bottom:-5px;display:flex;align-items:center;gap:2px;font-size:10px;text-shadow:none}.mark{width:8px;height:8px;border-radius:50%;background:#ba8d43;border:1px solid #f1d197;box-shadow:inset 0 0 0 1px #7c592a}
 .center{position:absolute;z-index:2;top:50%;left:50%;transform:translate(-50%,-50%) rotate(var(--dealer-angle,0deg));display:grid;justify-items:center;gap:4px;text-align:center;width:max-content;max-width:67%;color:var(--ink)}
 .pot-label{font-size:10px;letter-spacing:.15em;color:#e4c990}.pot{font:normal clamp(27px,9dvh,57px)/.93 Georgia,serif;font-variant-numeric:tabular-nums}.phase{font-size:11px;color:#e2dbc5}
-.game-pot{pointer-events:none}.game-pot .pot{font-size:clamp(21px,19cqh,56px)}
-.game-dock{flex:0 0 auto;min-height:94px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:4px 8px;border:1px solid #625a42;border-radius:12px;background:#1a3026}
-.dealer-top .game-dock{order:-1;transform:rotate(180deg)}
-.dock-actions{display:grid;align-content:center;justify-items:center;gap:3px;text-align:center;min-width:0}
-.dock-actions button{font-size:clamp(11px,2.1vmin,15px);min-height:34px;padding:5px 8px}
-.action-head{display:flex;align-items:center;justify-content:center;gap:10px;font-size:12px}
-.action-head button{border:0;background:none;min-height:23px;padding:0 6px;font-size:17px}
-.action-grid{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}.action-grid button{white-space:nowrap}
-.group{border:0;background:none;color:var(--soft);font-weight:500}.dock-actions .group{min-height:23px;padding:2px 6px}
-.raise-line{display:flex;align-items:center;justify-content:center;gap:5px}.raise-line input{width:84px;min-width:0;padding:5px 6px;background:#22392e;border:1px solid var(--edge);border-radius:6px;font-size:16px}
-.tools{display:flex;gap:5px;border-left:1px solid #635c46;padding-left:8px}.tools .icon{min-height:38px;width:38px;height:38px;font-size:19px}
-@media(max-width:540px) and (orientation:portrait){
- .game-dock{grid-template-columns:minmax(0,1fr);gap:4px}
- .tools{justify-content:center;border-left:0;padding-left:0}
+.table-controls{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);width:min(71cqw,430px);min-height:clamp(86px,34cqh,110px);display:grid;grid-template-columns:38px minmax(0,1fr) 38px;grid-template-rows:auto auto;align-content:center;align-items:center;gap:3px 5px;text-align:center}
+.dealer-top .table-controls{transform:translate(-50%,-50%) rotate(180deg)}
+.table-controls.with-actions{grid-template-columns:auto minmax(0,1fr) 34px;grid-template-rows:1fr}
+.game-pot{grid-column:2;grid-row:1;pointer-events:none;display:grid;justify-items:center;gap:2px}
+.game-pot .pot{font-size:clamp(24px,13cqh,48px)}
+.with-actions .game-pot{grid-column:1}
+.with-actions .game-pot .pot{font-size:clamp(18px,7cqh,31px)}
+.table-trigger{grid-column:3;grid-row:1 / -1;justify-self:center;width:34px;height:34px;min-height:34px;border-radius:50%;font-size:19px;border-color:#a9915a80}
+.dock-actions{grid-column:2;grid-row:2;display:grid;align-content:center;justify-items:center;gap:3px;min-width:0;text-align:center}
+.with-actions .dock-actions{grid-row:1}
+.dock-actions button{font-size:clamp(11px,2.1vmin,14px);min-height:32px;padding:4px 9px;line-height:1.16}
+.dock-actions .round-button{border-radius:999px;max-width:100%}
+.dock-actions > .phase{overflow-wrap:anywhere;font-size:10px}
+.action-head{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px}
+.action-head button{border:0;background:none;min-height:24px;padding:0 5px;font-size:17px}
+.action-grid{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}.action-grid button{white-space:nowrap;padding-inline:6px}
+.group{border:0;background:none;color:var(--soft);font-weight:500}.dock-actions .group{min-height:22px;padding:2px 5px}
+.raise-line{display:flex;align-items:center;justify-content:center;gap:5px}.raise-line input{width:72px;min-width:0;padding:5px 6px;background:#22392e;border:1px solid var(--edge);border-radius:6px;font-size:16px}
+@media(max-width:590px){
+ .table-controls{width:78cqw}
+ .action-head .phase{display:none}
+ .action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+ .action-grid button{white-space:normal;min-width:0;padding-inline:3px;overflow-wrap:anywhere}
+ .raise-line{flex-wrap:wrap}
 }
-@media(max-height:300px) and (orientation:landscape){
- .game-dock{min-height:82px}
- .dock-actions button{min-height:29px}
+@media(max-height:285px) and (orientation:landscape){
+ .table-controls{min-height:76px;gap:2px 4px}
+ .dock-actions button{min-height:28px}
  .action-head button,.dock-actions .group{min-height:19px}
  .game .seat-face{gap:0}
 }
-@media(orientation:landscape){
- .game{display:grid;grid-template-columns:clamp(126px,21vw,188px) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
- .game .board{grid-column:2;grid-row:1;align-self:stretch;min-width:0;--chip:clamp(31px,min(17cqw,27cqh),112px)}
- .game-dock{grid-column:1;grid-row:1;min-width:0;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:5px;padding:6px}
- .dealer-top .game-dock{order:0}
- .dock-actions{align-self:stretch;gap:5px}
- .dock-actions .phase{line-height:1.15;overflow-wrap:anywhere}
- .dock-actions button{padding:4px 5px;line-height:1.14;min-height:35px}
- .dock-actions .round-button{width:100%;max-width:150px}
- .action-head{display:grid;width:100%;grid-template-columns:minmax(0,1fr) auto;text-align:left;gap:2px 3px}
- .action-head .phase{grid-row:2;grid-column:1/-1;font-size:10px}
- .action-head button{min-height:24px;padding:0 5px}
- .action-grid{display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
- .action-grid button{white-space:normal;overflow-wrap:anywhere}
- .raise-line{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px}
- .raise-line input{width:100%;padding:4px}
- .raise-line button{grid-column:1/-1;width:100%}
- .tools{border-left:0;border-top:1px solid #635c46;justify-content:center;padding:5px 0 0}
- .tools .icon{width:32px;height:34px;min-height:34px}
-}
-@media(orientation:landscape) and (max-height:275px){
- .game-dock{gap:3px;padding:4px}
- .dock-actions{gap:3px}
- .dock-actions button{min-height:29px}
- .action-head button,.dock-actions .group{min-height:20px}
- .tools .icon{height:29px;min-height:29px}
-}
-@media(orientation:portrait){
- .game .board{order:0}
- .game-dock{order:1}
- .dealer-top .game-dock{order:-1}
+@media(prefers-reduced-motion:no-preference){
+ .table-trigger{transition:background .15s ease,transform .15s ease}
+ .table-trigger:active{transform:scale(.92);background:#3d533f}
+ dialog[open]{animation:menu-in .16s ease-out}
+ @keyframes menu-in{from{opacity:0;transform:translateY(4px) scale(.98)}to{opacity:1;transform:none}}
 }
 dialog{color:var(--ink);background:#193126;border:1px solid #a99262;border-radius:14px;padding:17px;max-width:min(510px,calc(100vw - 24px));max-height:calc(100dvh - 20px);width:100%;box-shadow:0 8px 35px #0008}dialog::backdrop{background:#05140ccc}dialog h2{margin:0 0 9px}dialog p{margin:7px 0}dialog .footer{justify-content:flex-end}dialog .row button{min-height:39px} .winner-list{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:8px 0}.winner-list button[aria-pressed=true]{background:var(--gold);color:#24271c}.payouts{display:flex;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--soft)}
 .results{width:100%;border-collapse:collapse;text-align:right;font-variant-numeric:tabular-nums;margin-top:12px}.results th,.results td{padding:7px 4px;border-bottom:1px solid #4e5c49}.results th{font-size:12px;color:var(--soft);font-weight:550}.results th:nth-child(2),.results td:nth-child(2){text-align:left}.results .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
@@ -540,19 +524,20 @@ const Poker = (() => {
     })).join('');
     const host = settings.host ? seat(settings.host,null) : '';
     const facingTop = dealerPosition.angle===180;
-    const pot = '<div class="center game-pot" style="--dealer-angle:'+dealerPosition.angle+'deg" aria-label="Банк">'+
+    const pot = '<div class="game-pot" aria-label="Банк">'+
       '<span class="pot-label">БАНК</span><span class="pot">'+fmt(h?Poker.bank(h):0)+'</span></div>';
-    const tools = '<div class="tools" role="group" aria-label="Управление сессией">'+
-      control('undo','↶','icon ghost','aria-label="Отменить последнее действие" title="Отменить" '+(undo.length?'':'disabled'))+
-      control('redo','↷','icon ghost','aria-label="Вернуть отменённое действие" title="Вернуть" '+(redo.length?'':'disabled'))+
-      control('menu','⋯','icon ghost','aria-label="Меню сессии" title="Меню"')+'</div>';
-    const dock = '<div class="game-dock">'+tableActions()+tools+'</div>';
-    return '<section class="game'+(facingTop?' dealer-top':'')+'">'+dock+boardMarkup(seats+host+pot)+'</section>';
+    const trigger = control('menu','⋯','table-trigger icon ghost','aria-label="Меню сессии" title="Меню"');
+    const actionsOpen = h?.phase==='bet'&&Boolean(panel);
+    const middle = '<div class="table-controls'+(actionsOpen?' with-actions':'')+'">'+pot+tableActions()+trigger+'</div>';
+    return '<section class="game'+(facingTop?' dealer-top':'')+'">'+boardMarkup(seats+host+middle)+'</section>';
   }
 
   function render() {
     app.innerHTML = ({setup,rules,resume,results:standings,game})[view]();
-    if (view === 'game') document.body.classList.add('at-table');
+    if (view === 'game') {
+      document.body.classList.add('at-table');
+      fitTableSeats();
+    }
     else document.body.classList.remove('at-table');
   }
 
@@ -667,6 +652,7 @@ const Poker = (() => {
       panel='';
     } else if (command==='undo') {
       if (!undo.length)return;
+      dismiss();
       redo.push(state);
       state=undo.pop();
       panel='';
@@ -674,6 +660,7 @@ const Poker = (() => {
       tell('Последнее действие отменено');
     } else if (command==='redo') {
       if (!redo.length)return;
+      dismiss();
       undo.push(state);
       state=redo.pop();
       panel='';
@@ -681,6 +668,9 @@ const Poker = (() => {
       tell('Действие возвращено');
     } else if (command==='menu') {
       openModal('menu','Сессия','<p class="muted">'+(state.hand?'Раздача '+state.number:'Сыграно раздач: '+state.number)+'</p>'+
+        '<div class="row">'+
+        control('undo','↶ Отменить','ghost',undo.length?'':'disabled')+
+        control('redo','↷ Вернуть','ghost',redo.length?'':'disabled')+'</div>'+
         '<div class="footer">'+control('close-modal','К столу','ghost')+
         control('end-ask','Завершить сессию','danger')+'</div>');
       return;
@@ -756,6 +746,62 @@ const Poker = (() => {
     const {seats,host}=layout();
     newSession({seats,host,order:clockwise(seats),mode:draft.mode,dealer:draft.dealer,
       edge:draft.edge,free:draft.free,layoutKey:layoutKey(),stack:draft.stack,ante:draft.ante});
+  });
+
+  function fitTableSeats(retry = 0) {
+    const board = app.querySelector('.game .board');
+    if (!board?.getBoundingClientRect || !board.clientWidth || !board.clientHeight) return;
+    if (!retry) board.style.removeProperty('--chip');
+    const controls = board.querySelector('.table-controls');
+    const box = board.getBoundingClientRect(), panelBox = controls.getBoundingClientRect();
+    const width = board.clientWidth, height = board.clientHeight;
+    const left = box.left + board.clientLeft, top = box.top + board.clientTop;
+    const safe = {left:panelBox.left-left-5,right:panelBox.right-left+5,top:panelBox.top-top-5,bottom:panelBox.bottom-top+5};
+    const seats = [...board.querySelectorAll('.seat')];
+    const layout = state.settings.seats;
+    const positions = seats.map(element=>{
+      const id = element.dataset.seat;
+      const p = id==='host' ? state.settings.host : layout[Number(id)];
+      return {element,x:p.x*width/100,y:p.y*height/100,r:element.offsetWidth/2+4};
+    });
+    const placed = [];
+    const clamp = (value,r,max) => Math.max(r,Math.min(max-r,value));
+    const available = (x,y,r) => {
+      if (x+r>safe.left && x-r<safe.right && y+r>safe.top && y-r<safe.bottom) return false;
+      return placed.every(p=>Math.hypot(x-p.x,y-p.y)>=r+p.r);
+    };
+    const deferred = [];
+    const place = (p,x,y) => {
+      placed.push({x,y,r:p.r});
+      p.element.style.setProperty('--x',x/width*100+'%');
+      p.element.style.setProperty('--y',y/height*100+'%');
+    };
+    for (const p of positions) {
+      const x=clamp(p.x,p.r,width),y=clamp(p.y,p.r,height);
+      if (available(x,y,p.r)) place(p,x,y);
+      else deferred.push(p);
+    }
+    for (const p of deferred) {
+      let best;
+      for (let distance=0; !best && distance<=Math.hypot(width,height); distance+=5) {
+        for (let i=0;i<24;i++) {
+          const angle=i*Math.PI/12;
+          const x=clamp(p.x+distance*Math.cos(angle),p.r,width);
+          const y=clamp(p.y+distance*Math.sin(angle),p.r,height);
+          if (available(x,y,p.r)) {best={x,y};break;}
+        }
+      }
+      if (!best && retry < 4 && p.element.offsetWidth > 32) {
+        board.style.setProperty('--chip',Math.max(32,Math.floor(p.element.offsetWidth*.83))+'px');
+        fitTableSeats(retry+1);
+        return;
+      }
+      place(p,best?.x??clamp(p.x,p.r,width),best?.y??clamp(p.y,p.r,height));
+    }
+  }
+
+  window.addEventListener('resize',()=>{
+    if (view==='game') fitTableSeats();
   });
 
   function clampPoint(x,y,board,element) {

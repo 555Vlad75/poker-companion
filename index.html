@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#132820">
 <title>Poker Companion</title>
 <style>
-:root{color-scheme:dark;--ink:#fff1d6;--soft:#d8ccb3;--gold:#e9cd92;--dark:#142820;--panel:#1b3228;--edge:#68684f;--danger:#f2a798;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#11231b;color:var(--ink)}
+:root{--safe-left:calc(max(env(safe-area-inset-left,0px),var(--tg-safe-area-inset-left,0px)) + var(--tg-content-safe-area-inset-left,0px));--safe-bottom:calc(max(env(safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)) + var(--tg-content-safe-area-inset-bottom,0px));--safe-right:calc(max(env(safe-area-inset-right,0px),var(--tg-safe-area-inset-right,0px)) + var(--tg-content-safe-area-inset-right,0px));--safe-top:calc(max(env(safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px)) + var(--tg-content-safe-area-inset-top,0px));color-scheme:dark;--ink:#fff1d6;--soft:#d8ccb3;--gold:#e9cd92;--dark:#142820;--panel:#1b3228;--edge:#68684f;--danger:#f2a798;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#11231b;color:var(--ink)}
 *{box-sizing:border-box}body{margin:0}button,input,select{font:inherit;color:inherit}button,select{cursor:pointer}button{border:1px solid var(--edge);background:#2b4335;border-radius:9px;padding:9px 13px;min-height:42px;font-weight:550}button:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:default;filter:none}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ffe6ad;outline-offset:3px}
 .primary{background:var(--gold);border-color:var(--gold);color:#26271c}.ghost{background:#142820a0}.danger{color:var(--danger);border-color:#a87968}.icon{width:42px;height:42px;padding:0;font-size:19px;line-height:1;display:grid;place-items:center}
 [hidden]{display:none!important}
-.shell{max-width:1080px;margin:auto;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.shell{max-width:1080px;margin:auto;padding:max(12px,var(--safe-top)) max(16px,var(--safe-right)) max(14px,var(--safe-bottom)) max(16px,var(--safe-left))}
 .brand{font-size:11px;letter-spacing:.16em;color:var(--gold);font-weight:650}
 h1,h2{font:normal clamp(25px,5vw,37px)/1.13 Georgia,serif;margin:5px 0 0}h2{font-size:26px}p{margin:0}.muted{color:var(--soft);font-size:13px}.eyebrow{font-size:11px;letter-spacing:.13em;color:var(--gold)}.header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.footer{display:flex;justify-content:space-between;gap:8px;margin-top:12px}
 .setup-grid{display:grid;grid-template-columns:minmax(200px,235px) minmax(0,1fr);gap:14px;align-items:start}.settings{display:grid;gap:10px}.field{display:grid;gap:4px;font-size:13px;color:var(--soft)}.field input,.field select{width:100%;min-height:42px;border:1px solid var(--edge);border-radius:8px;background:#22392e;color:var(--ink);padding:7px 10px;font-size:16px}.field select{appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 12 8%27%3E%3Cpath d=%27m1 1.5 5 5 5-5%27 fill=%27none%27 stroke=%27%23dfc88e%27 stroke-width=%271.6%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E");background-position:right 11px center;background-size:12px 8px;background-repeat:no-repeat}
@@ -18,7 +18,7 @@ fieldset{padding:0;border:0;margin:0;min-width:0}legend{padding:0;margin-bottom:
 .card{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:16px}.narrow{max-width:590px;margin:0 auto}.error{color:var(--danger);font-size:13px;min-height:1em;margin-top:7px}
 .board{--chip:clamp(44px, min(12vw, 23dvh), 110px);position:relative;isolation:isolate;height:clamp(202px,64dvh,380px);overflow:hidden;border:6px solid #64472e;border-radius:24px;background:radial-gradient(ellipse at 50% 44%,#295e45 0%,#184333 58%,#102d23 100%);box-shadow:inset 0 0 0 1px #bd9e62,inset 0 0 32px #071c14,0 4px 18px #0004}
 .board:before{content:"";position:absolute;inset:9px;border-radius:14px;border:1px solid #d9bb7540;background:repeating-linear-gradient(45deg,#ffffff05 0 1px,transparent 1px 4px);pointer-events:none;z-index:-1}
-.game{height:100dvh;padding:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))}
+.game{height:100dvh;padding:max(4px,var(--safe-top)) max(4px,var(--safe-right)) max(4px,var(--safe-bottom)) max(4px,var(--safe-left))}
 .game .board{height:100%;width:100%;container-type:size;--chip:clamp(34px,min(13cqw,25cqh),112px);border-width:6px}
 .game .seat{--seat-margin:calc(var(--chip) / 2 + 3px);left:clamp(var(--seat-margin),var(--x),calc(100% - var(--seat-margin)));top:clamp(var(--seat-margin),var(--y),calc(100% - var(--seat-margin)))}
 .game .balance{font-size:clamp(15px,calc(var(--chip)*.43),48px)}.game .balance.long{font-size:clamp(12px,calc(var(--chip)*.31),34px)}
@@ -76,7 +76,7 @@ dialog{color:var(--ink);background:#193126;border:1px solid #a99262;border-radiu
 .results{width:100%;border-collapse:collapse;text-align:right;font-variant-numeric:tabular-nums;margin-top:12px}.results th,.results td{padding:7px 4px;border-bottom:1px solid #4e5c49}.results th{font-size:12px;color:var(--soft);font-weight:550}.results th:nth-child(2),.results td:nth-child(2){text-align:left}.results .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
 .notice{position:fixed;z-index:7;bottom:8px;left:50%;transform:translateX(-50%);max-width:80%;background:#11251c;border:1px solid var(--edge);border-radius:9px;padding:7px 11px;font-size:12px;text-align:center;pointer-events:none}
 @media(max-width:580px) and (orientation:portrait){.setup-grid{grid-template-columns:1fr}.settings{grid-template-columns:1fr 1fr}.settings fieldset{grid-column:1/-1}.settings .checkbox{grid-column:1/-1}.board{--chip:clamp(41px,13vw,70px);height:215px}.game{height:clamp(350px,72dvh,540px)}}
-@media(orientation:landscape) and (max-height:430px){.shell{padding-top:7px;padding-bottom:7px}.header{margin-bottom:8px}.header h1{font-size:26px}.settings{gap:5px}.field input,.field select{min-height:34px}.checkbox{min-height:31px}.board{height:clamp(187px,62dvh,270px)}.footer{margin-top:7px}}
+@media(orientation:landscape) and (max-height:430px){.shell{padding-top:max(7px,var(--safe-top));padding-bottom:max(7px,var(--safe-bottom))}.header{margin-bottom:8px}.header h1{font-size:26px}.settings{gap:5px}.field input,.field select{min-height:34px}.checkbox{min-height:31px}.board{height:clamp(187px,62dvh,270px)}.footer{margin-top:7px}}
 
 @media(prefers-reduced-motion:no-preference){.seat.active{animation:turn-in .18s ease-out}@keyframes turn-in{from{outline-offset:0}to{outline-offset:3px}}}
 </style>
@@ -902,7 +902,45 @@ const Poker = (() => {
     }
   });
 
+  function initializeTelegram() {
+    const telegram = window.Telegram?.WebApp;
+    if (!telegram || telegram.platform === 'unknown') return;
+    const supports = version => telegram.isVersionAtLeast?.(version) === true;
+    const refreshLayout = () => {
+      if (view === 'game') window.requestAnimationFrame(() => fitTableSeats());
+    };
+    if (supports('8.0')) {
+      for (const event of ['fullscreenChanged','fullscreenFailed','safeAreaChanged','contentSafeAreaChanged','viewportChanged']) {
+        telegram.onEvent?.(event,refreshLayout);
+      }
+    }
+    telegram.ready?.();
+    if (supports('7.7')) telegram.disableVerticalSwipes?.();
+    telegram.expand?.();
+    if (supports('8.0') && !telegram.isFullscreen) telegram.requestFullscreen?.();
+    refreshLayout();
+  }
+
+  function loadTelegram() {
+    if (window.Telegram?.WebApp) {
+      initializeTelegram();
+      return;
+    }
+    const launch = window.location;
+    if (!launch) return;
+    const params = new URLSearchParams(launch.hash.slice(1));
+    const query = new URLSearchParams(launch.search);
+    const fromTelegram = ['tgWebAppData','tgWebAppVersion','tgWebAppPlatform']
+      .some(key => params.has(key) || query.has(key));
+    if (!fromTelegram) return;
+    const sdk = document.createElement('script');
+    sdk.src = 'https://telegram.org/js/telegram-web-app.js?64';
+    sdk.addEventListener('load',initializeTelegram,{once:true});
+    document.head.append(sdk);
+  }
+
   render();
+  loadTelegram();
   if(!storageOK)tell('Не удалось прочитать сохранённую сессию.',true);
 })();
 </script>

@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#132820">
+<title>Poker Companion</title>
+<style>
+:root{color-scheme:dark;--ink:#fff1d6;--soft:#d8ccb3;--gold:#e9cd92;--dark:#142820;--panel:#1b3228;--edge:#68684f;--danger:#f2a798;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#11231b;color:var(--ink)}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit;color:inherit}button,select{cursor:pointer}button{border:1px solid var(--edge);background:#2b4335;border-radius:9px;padding:9px 13px;min-height:42px;font-weight:550}button:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:default;filter:none}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ffe6ad;outline-offset:3px}
+.primary{background:var(--gold);border-color:var(--gold);color:#26271c}.ghost{background:#142820a0}.danger{color:var(--danger);border-color:#a87968}.icon{width:42px;height:42px;padding:0;font-size:19px;line-height:1;display:grid;place-items:center}
+[hidden]{display:none!important}
+.shell{max-width:1080px;margin:auto;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.brand{font-size:11px;letter-spacing:.16em;color:var(--gold);font-weight:650}
+h1,h2{font:normal clamp(25px,5vw,37px)/1.13 Georgia,serif;margin:5px 0 0}h2{font-size:26px}p{margin:0}.muted{color:var(--soft);font-size:13px}.eyebrow{font-size:11px;letter-spacing:.13em;color:var(--gold)}.header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.footer{display:flex;justify-content:space-between;gap:8px;margin-top:12px}
+.setup-grid{display:grid;grid-template-columns:minmax(200px,235px) minmax(0,1fr);gap:14px;align-items:start}.settings{display:grid;gap:10px}.field{display:grid;gap:4px;font-size:13px;color:var(--soft)}.field input,.field select{width:100%;min-height:42px;border:1px solid var(--edge);border-radius:8px;background:#22392e;color:var(--ink);padding:7px 10px;font-size:16px}.field select{appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 12 8%27%3E%3Cpath d=%27m1 1.5 5 5 5-5%27 fill=%27none%27 stroke=%27%23dfc88e%27 stroke-width=%271.6%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E");background-position:right 11px center;background-size:12px 8px;background-repeat:no-repeat}
+fieldset{padding:0;border:0;margin:0;min-width:0}legend{padding:0;margin-bottom:4px;color:var(--soft);font-size:13px}.count{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}.count button{padding:0;min-height:38px}.count button[aria-pressed=true]{background:var(--gold);color:#26271c;border-color:var(--gold)}.checkbox{display:flex;align-items:center;gap:8px;min-height:39px;font-size:14px}.checkbox input{accent-color:var(--gold);width:19px;height:19px}.field-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--panel);border:1px solid var(--edge);border-radius:14px;padding:16px}.narrow{max-width:590px;margin:0 auto}.error{color:var(--danger);font-size:13px;min-height:1em;margin-top:7px}
+.board{--chip:clamp(44px, min(12vw, 23dvh), 110px);position:relative;isolation:isolate;height:clamp(202px,64dvh,380px);overflow:hidden;border:6px solid #64472e;border-radius:24px;background:radial-gradient(ellipse at 50% 44%,#295e45 0%,#184333 58%,#102d23 100%);box-shadow:inset 0 0 0 1px #bd9e62,inset 0 0 32px #071c14,0 4px 18px #0004}
+.board:before{content:"";position:absolute;inset:9px;border-radius:14px;border:1px solid #d9bb7540;background:repeating-linear-gradient(45deg,#ffffff05 0 1px,transparent 1px 4px);pointer-events:none;z-index:-1}
+.game{height:100dvh;display:flex;flex-direction:column;gap:5px;padding:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))}
+.game .board{height:auto;flex:1 1 0;min-height:0;container-type:size;--chip:clamp(34px,min(13cqw,27cqh),112px);border-width:6px}
+.game .seat{--seat-margin:calc(var(--chip) / 2 + 3px);left:clamp(var(--seat-margin),var(--x),calc(100% - var(--seat-margin)));top:clamp(var(--seat-margin),var(--y),calc(100% - var(--seat-margin)))}
+.game .balance{font-size:clamp(15px,calc(var(--chip)*.43),48px)}.game .balance.long{font-size:clamp(12px,calc(var(--chip)*.31),34px)}
+.game .wager,.game .seat-id{font-size:clamp(8px,calc(var(--chip)*.16),14px)}
+.game .seat-face{gap:clamp(0px,1cqh,2px)}
+.seat{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);display:grid;place-items:center;width:var(--chip);height:var(--chip);padding:0;min-height:0;border-radius:50%;border:2px solid var(--rim);background:radial-gradient(ellipse at 39% 24%,var(--bright),var(--shade) 77%);box-shadow:inset 0 0 0 3px #160e133b,0 3px 7px #02110b8a;color:#fffaf0;touch-action:manipulation}
+.seat:hover{filter:none}.seat.movable{touch-action:none;user-select:none;cursor:grab}.seat.dragging{z-index:4;cursor:grabbing}.seat.clashing{opacity:.68}.seat.folded{filter:saturate(.5);opacity:.73}.seat.waiting{filter:saturate(.35);opacity:.66}.seat.active{outline:2px solid #ffe9aa;outline-offset:3px}.seat.chosen{outline:3px solid #fff1b6;outline-offset:3px}
+.seat-face{position:relative;transform:rotate(var(--angle));display:grid;justify-items:center;align-content:center;gap:2px;line-height:1;width:100%;height:100%;pointer-events:none;text-shadow:0 1px 3px #000b}
+.seat-id{font-size:clamp(10px,2vmin,14px);font-weight:650;letter-spacing:.04em}.setup-seat .seat-id{font:normal clamp(18px,4vmin,28px)/1 Georgia,serif}
+.balance{font:normal clamp(19px,min(5vw,9dvh),52px)/.96 Georgia,serif;letter-spacing:-.045em;font-variant-numeric:tabular-nums}.balance.long{font-size:clamp(14px,min(3.6vw,6.8dvh),37px)}
+.wager{font-size:clamp(10px,2.2vmin,15px);font-weight:550;color:#fff2de;font-variant-numeric:tabular-nums}
+.dealer-tag,.first-tag{position:absolute;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#e4c787;color:#28251c;text-shadow:none;font:700 10px/1 system-ui;top:-4px;right:0;box-shadow:0 1px 4px #0008}.first-tag{left:0;right:auto;background:#153829;color:#fff2ca;border:1px solid #d9bb78}
+.host-seat{border:1px dashed #d9c293;background:#17372b;color:var(--gold);box-shadow:none}.host-seat .seat-face{font-size:11px}.host-seat .seat-id{font-size:18px}
+.marks{position:absolute;bottom:-5px;display:flex;align-items:center;gap:2px;font-size:10px;text-shadow:none}.mark{width:8px;height:8px;border-radius:50%;background:#ba8d43;border:1px solid #f1d197;box-shadow:inset 0 0 0 1px #7c592a}
+.center{position:absolute;z-index:2;top:50%;left:50%;transform:translate(-50%,-50%) rotate(var(--dealer-angle,0deg));display:grid;justify-items:center;gap:4px;text-align:center;width:max-content;max-width:67%;color:var(--ink)}
+.pot-label{font-size:10px;letter-spacing:.15em;color:#e4c990}.pot{font:normal clamp(27px,9dvh,57px)/.93 Georgia,serif;font-variant-numeric:tabular-nums}.phase{font-size:11px;color:#e2dbc5}
+.game-pot{pointer-events:none}.game-pot .pot{font-size:clamp(21px,19cqh,56px)}
+.game-dock{flex:0 0 auto;min-height:94px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:4px 8px;border:1px solid #625a42;border-radius:12px;background:#1a3026}
+.dealer-top .game-dock{order:-1;transform:rotate(180deg)}
+.dock-actions{display:grid;align-content:center;justify-items:center;gap:3px;text-align:center;min-width:0}
+.dock-actions button{font-size:clamp(11px,2.1vmin,15px);min-height:34px;padding:5px 8px}
+.action-head{display:flex;align-items:center;justify-content:center;gap:10px;font-size:12px}
+.action-head button{border:0;background:none;min-height:23px;padding:0 6px;font-size:17px}
+.action-grid{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}.action-grid button{white-space:nowrap}
+.group{border:0;background:none;color:var(--soft);font-weight:500}.dock-actions .group{min-height:23px;padding:2px 6px}
+.raise-line{display:flex;align-items:center;justify-content:center;gap:5px}.raise-line input{width:84px;min-width:0;padding:5px 6px;background:#22392e;border:1px solid var(--edge);border-radius:6px;font-size:16px}
+.tools{display:flex;gap:5px;border-left:1px solid #635c46;padding-left:8px}.tools .icon{min-height:38px;width:38px;height:38px;font-size:19px}
+@media(max-width:540px) and (orientation:portrait){
+ .game-dock{grid-template-columns:minmax(0,1fr);gap:4px}
+ .tools{justify-content:center;border-left:0;padding-left:0}
+}
+@media(max-height:300px) and (orientation:landscape){
+ .game-dock{min-height:82px}
+ .dock-actions button{min-height:29px}
+ .action-head button,.dock-actions .group{min-height:19px}
+ .game .seat-face{gap:0}
+}
+@media(orientation:landscape){
+ .game{display:grid;grid-template-columns:clamp(126px,21vw,188px) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+ .game .board{grid-column:2;grid-row:1;align-self:stretch;min-width:0;--chip:clamp(31px,min(17cqw,27cqh),112px)}
+ .game-dock{grid-column:1;grid-row:1;min-width:0;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:5px;padding:6px}
+ .dealer-top .game-dock{order:0}
+ .dock-actions{align-self:stretch;gap:5px}
+ .dock-actions .phase{line-height:1.15;overflow-wrap:anywhere}
+ .dock-actions button{padding:4px 5px;line-height:1.14;min-height:35px}
+ .dock-actions .round-button{width:100%;max-width:150px}
+ .action-head{display:grid;width:100%;grid-template-columns:minmax(0,1fr) auto;text-align:left;gap:2px 3px}
+ .action-head .phase{grid-row:2;grid-column:1/-1;font-size:10px}
+ .action-head button{min-height:24px;padding:0 5px}
+ .action-grid{display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .action-grid button{white-space:normal;overflow-wrap:anywhere}
+ .raise-line{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px}
+ .raise-line input{width:100%;padding:4px}
+ .raise-line button{grid-column:1/-1;width:100%}
+ .tools{border-left:0;border-top:1px solid #635c46;justify-content:center;padding:5px 0 0}
+ .tools .icon{width:32px;height:34px;min-height:34px}
+}
+@media(orientation:landscape) and (max-height:275px){
+ .game-dock{gap:3px;padding:4px}
+ .dock-actions{gap:3px}
+ .dock-actions button{min-height:29px}
+ .action-head button,.dock-actions .group{min-height:20px}
+ .tools .icon{height:29px;min-height:29px}
+}
+@media(orientation:portrait){
+ .game .board{order:0}
+ .game-dock{order:1}
+ .dealer-top .game-dock{order:-1}
+}
+dialog{color:var(--ink);background:#193126;border:1px solid #a99262;border-radius:14px;padding:17px;max-width:min(510px,calc(100vw - 24px));max-height:calc(100dvh - 20px);width:100%;box-shadow:0 8px 35px #0008}dialog::backdrop{background:#05140ccc}dialog h2{margin:0 0 9px}dialog p{margin:7px 0}dialog .footer{justify-content:flex-end}dialog .row button{min-height:39px} .winner-list{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:8px 0}.winner-list button[aria-pressed=true]{background:var(--gold);color:#24271c}.payouts{display:flex;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--soft)}
+.results{width:100%;border-collapse:collapse;text-align:right;font-variant-numeric:tabular-nums;margin-top:12px}.results th,.results td{padding:7px 4px;border-bottom:1px solid #4e5c49}.results th{font-size:12px;color:var(--soft);font-weight:550}.results th:nth-child(2),.results td:nth-child(2){text-align:left}.results .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.notice{position:fixed;z-index:7;bottom:8px;left:50%;transform:translateX(-50%);max-width:80%;background:#11251c;border:1px solid var(--edge);border-radius:9px;padding:7px 11px;font-size:12px;text-align:center;pointer-events:none}
+@media(max-width:580px) and (orientation:portrait){.setup-grid{grid-template-columns:1fr}.settings{grid-template-columns:1fr 1fr}.settings fieldset{grid-column:1/-1}.settings .checkbox{grid-column:1/-1}.board{--chip:clamp(41px,13vw,70px);height:215px}.game{height:clamp(350px,72dvh,540px)}}
+@media(orientation:landscape) and (max-height:430px){.shell{padding-top:7px;padding-bottom:7px}.header{margin-bottom:8px}.header h1{font-size:26px}.settings{gap:5px}.field input,.field select{min-height:34px}.checkbox{min-height:31px}.board{height:clamp(187px,62dvh,270px)}.footer{margin-top:7px}}
+
+@media(prefers-reduced-motion:no-preference){.seat.active{animation:turn-in .18s ease-out}@keyframes turn-in{from{outline-offset:0}to{outline-offset:3px}}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<dialog id="dialog"></dialog>
+<div class="notice" id="notice" role="status" hidden></div>
+<noscript>Для Poker Companion нужен JavaScript.</noscript>
+<script>
+const Poker = (() => {
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const initialState = settings => ({
+    settings: copy(settings), number: 0, hand: null, result: null, ended: false,
+    players: settings.seats.map((_, id) => ({
+      id, balance: settings.stack, busts: 0, rebuys: 0, returnAt: 0
+    }))
+  });
+  const around = (s, after, ids) => {
+    const order = s.settings.order;
+    const start = order.indexOf(after);
+    for (let i = 1; i <= order.length; i++) {
+      const id = order[(start + i) % order.length];
+      if (ids.includes(id)) return id;
+    }
+    return null;
+  };
+  const survivors = h => h.entries.filter(e => !e.fold);
+  const entry = (h, id) => h.entries.find(e => e.id === id);
+  const due = (h, e) => Math.max(0, h.target - e.street);
+  const bank = h => h.entries.reduce((sum, e) => sum + e.total, 0);
+
+  function post(s, e, amount, ante = false) {
+    s.players[e.id].balance -= amount;
+    e.total += amount;
+    if (!ante) e.street += amount;
+  }
+
+  function advance(s, after) {
+    const h = s.hand;
+    const alive = survivors(h);
+    if (alive.length === 1) {
+      h.phase = 'award';
+      h.current = null;
+      return;
+    }
+    const funded = alive.filter(e => s.players[e.id].balance > 0);
+    h.pending = h.pending.filter(id => funded.some(e => e.id === id));
+    if (funded.length <= 1) h.pending = funded.filter(e => due(h, e) > 0).map(e => e.id);
+    if (h.pending.length) {
+      h.phase = 'bet';
+      h.current = around(s, after, h.pending);
+      return;
+    }
+    h.current = null;
+    h.phase = funded.length <= 1 && h.street < 3 ? 'runout' : h.street === 3 ? 'showdown' : 'break';
+  }
+
+  function start(s) {
+    if (s.hand || s.ended) return false;
+    const next = s.number + 1;
+    const ready = s.players.filter(p => p.balance > 0 || (p.returnAt > 0 && p.returnAt <= next));
+    const emergency = ready.length < 2;
+    const returning = [];
+    for (const p of s.players) {
+      if (p.returnAt && (p.returnAt <= next || emergency)) {
+        p.balance = s.settings.stack;
+        p.rebuys += s.settings.stack;
+        p.returnAt = 0;
+        returning.push(p.id);
+      }
+    }
+    const entries = s.players.filter(p => p.balance > 0).map(p => ({
+      id: p.id, total: 0, street: 0, fold: false
+    }));
+    if (entries.length < 2) throw Error('Для раздачи нужны два игрока');
+    const last = s.result?.starter ?? null;
+    const starter = around(s, last, entries.map(e => e.id));
+    s.number = next;
+    s.result = null;
+    const h = s.hand = {starter, entries, target: 0, street: 0, pending: [], current: null, phase: 'bet', returning};
+    for (const e of entries) post(s, e, Math.min(s.settings.ante, s.players[e.id].balance), true);
+    h.pending = entries.map(e => e.id);
+    const order = s.settings.order;
+    const beforeStarter = order[(order.indexOf(starter) + order.length - 1) % order.length];
+    advance(s, beforeStarter);
+    return true;
+  }
+
+  function action(s, kind, target) {
+    const h = s.hand;
+    if (!h || h.phase !== 'bet') return false;
+    const e = entry(h, h.current);
+    const balance = s.players[e.id].balance;
+    const need = due(h, e);
+    const canRaise = survivors(h).some(other => other.id !== e.id && s.players[other.id].balance > 0);
+    let amount = 0;
+    if (kind === 'fold') e.fold = true;
+    else if (kind === 'check' && need === 0) {}
+    else if (kind === 'call' && need > 0) amount = Math.min(need, balance);
+    else if (kind === 'all' && (balance <= need || canRaise)) amount = balance;
+    else if (kind === 'raise' && canRaise && Number.isSafeInteger(target) && target > h.target && target - e.street <= balance) {
+      amount = target - e.street;
+    } else return false;
+    post(s, e, amount);
+    h.pending = h.pending.filter(id => id !== e.id);
+    if (e.street > h.target) {
+      h.target = e.street;
+      h.pending = survivors(h).filter(other => other.id !== e.id && s.players[other.id].balance > 0).map(other => other.id);
+    }
+    advance(s, e.id);
+    return true;
+  }
+
+  function group(s, kind) {
+    const h = s.hand;
+    if (!h || h.phase !== 'bet' || h.pending.length < 2) return false;
+    const eligible = h.pending.every(id => {
+      const need = due(h, entry(h, id));
+      return kind === 'check' ? need === 0 : kind === 'call' && need > 0 && need <= s.players[id].balance;
+    });
+    if (!eligible) return false;
+    while (h.phase === 'bet') action(s, kind);
+    return true;
+  }
+
+  function nextStreet(s) {
+    const h = s.hand;
+    if (!h) return false;
+    if (h.phase === 'runout') {
+      h.street = 3;
+      h.phase = 'showdown';
+      return true;
+    }
+    if (h.phase !== 'break') return false;
+    h.street++;
+    h.target = 0;
+    h.entries.forEach(e => { e.street = 0; });
+    h.pending = survivors(h).map(e => e.id);
+    const order = s.settings.order;
+    advance(s, order[(order.indexOf(h.starter) + order.length - 1) % order.length]);
+    return true;
+  }
+
+  function calculate(h, winners) {
+    if (!h || !['award', 'showdown'].includes(h.phase) || !winners.length) return null;
+    const unique = new Set(winners);
+    if (unique.size !== winners.length || winners.some(id => !survivors(h).some(e => e.id === id))) return null;
+    const pot = bank(h);
+    const share = Math.floor(pot / winners.length);
+    const payouts = winners.map(id => ({id, amount: Math.min(share, 2 * entry(h, id).total)}));
+    return {pot, payouts, burned: pot - payouts.reduce((sum, p) => sum + p.amount, 0)};
+  }
+
+  function settle(s, winners) {
+    const h = s.hand;
+    const payment = calculate(h, winners);
+    if (!payment) return false;
+    payment.payouts.forEach(({id, amount}) => { s.players[id].balance += amount; });
+    const bankrupt = [];
+    for (const e of h.entries) {
+      const p = s.players[e.id];
+      if (p.balance === 0) {
+        p.busts++;
+        p.returnAt = s.number + 2;
+        bankrupt.push(p.id);
+      }
+    }
+    s.result = {...payment, bankrupt, starter: h.starter};
+    s.hand = null;
+    return true;
+  }
+
+  function end(s) {
+    if (s.ended) return false;
+    if (s.hand) {
+      for (const {id, total} of s.hand.entries) s.players[id].balance += total;
+      for (const id of s.hand.returning || []) {
+        const p = s.players[id];
+        p.balance -= s.settings.stack;
+        p.rebuys -= s.settings.stack;
+      }
+      s.hand = null;
+      s.number--;
+    }
+    s.ended = true;
+    return true;
+  }
+
+  function standings(s) {
+    const rows = s.players.map(p => ({...p, score: p.balance - p.rebuys}))
+      .sort((a, b) => b.score - a.score || a.id - b.id);
+    return rows.map((row, i) => ({...row, place: i && row.score === rows[i-1].score ? rows[i-1].place : i + 1}));
+  }
+  return {copy, initialState, entry, survivors, due, bank, start, action, group, nextStreet, calculate, settle, end, standings};
+})();
+(() => {
+  'use strict';
+  const app = document.getElementById('app');
+  const dialog = document.getElementById('dialog');
+  const notice = document.getElementById('notice');
+  const storageKey = 'poker-companion.session.v1';
+  const palette = [
+    ['#c73b4a','#7b2030','#ff938e'], ['#2675cd','#183569','#81c3ff'],
+    ['#b67916','#754208','#ffdc74'], ['#8a49c4','#4c256c','#cda4ff'],
+    ['#16864e','#074a30','#76e0a4'], ['#626f82','#30394a','#dce9f5'],
+    ['#bc3879','#732247','#ff9dc9'], ['#128499','#0d4e5a','#78e6ed']
+  ];
+  const names = ['I','II','III','IV','V','VI','VII','VIII'];
+  const streetLabels = ['Карты на руках','3 карты на столе','4 карты на столе','5 карт на столе'];
+  const nextLabels = ['','Открыли 3 карты','Открыли 4-ю карту','Открыли 5-ю карту'];
+  const edges = {
+    right:{x:89,y:50,angle:-90,name:'Справа'}, left:{x:11,y:50,angle:90,name:'Слева'},
+    top:{x:50,y:19,angle:180,name:'Сверху'}, bottom:{x:50,y:81,angle:0,name:'Снизу'}
+  };
+  const layouts = {
+    3:[[50],[29,71]],4:[[29,71],[29,71]],5:[[26,74],[20,50,80]],
+    6:[[20,50,80],[20,50,80]],7:[[20,50,80],[13,38,62,87]],
+    8:[[13,38,62,87],[13,38,62,87]]
+  };
+  const gapLayouts = {1:[25],2:[26,74],3:[13,32,80],4:[13,32,68,87]};
+  const fmt = value => Number(value).toLocaleString('ru-RU');
+  const playerName = id => 'Игрок ' + names[id];
+  const selected = (value, expected) => value === expected ? ' selected' : '';
+  const control = (command, text, classes = '', extra = '') => '<button type="button" data-action="' + command + '" class="' + classes + '" ' + extra + '>' + text + '</button>';
+  const boardMarkup = (content, style = '') => '<div class="board" aria-label="Стол" ' + style + '>' + content + '</div>';
+
+  let state = null, undo = [], redo = [], storageOK = true;
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+    if (saved?.version === 1 && saved.state?.settings?.seats?.length >= 3) {
+      state = saved.state;
+      undo = Array.isArray(saved.undo) ? saved.undo : [];
+      redo = Array.isArray(saved.redo) ? saved.redo : [];
+    }
+  } catch { storageOK = false; }
+
+  function freshDraft(settings) {
+    if (settings) {
+      return {count:settings.seats.length, mode:settings.mode, dealer:settings.dealer, edge:settings.edge, free:settings.free,
+        saved:settings.free ? {[settings.layoutKey]:{seats:Poker.copy(settings.seats), host:Poker.copy(settings.host)}} : {},
+        stack:settings.stack, ante:settings.ante};
+    }
+    return {count:6,mode:'player',dealer:5,edge:'right',free:false,saved:{},stack:100,ante:5};
+  }
+
+  let draft = freshDraft(state?.settings);
+  let view = state ? (state.ended ? 'results' : 'resume') : 'setup';
+  let panel = '';
+  let winnerSelection = [];
+  let drag = null;
+  let draggedSeat = null;
+  let noticeTimer;
+  let modalType = '';
+
+  function tell(message, persistent = false) {
+    clearTimeout(noticeTimer);
+    notice.textContent = message;
+    notice.hidden = false;
+    if (!persistent) noticeTimer = setTimeout(() => { notice.hidden = true; }, 2500);
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({version:1,state,undo,redo}));
+      storageOK = true;
+    } catch {
+      storageOK = false;
+      tell('На этом устройстве не удалось сохранить сессию.', true);
+    }
+  }
+
+  function change(update) {
+    if (!state) return false;
+    const previous = Poker.copy(state);
+    if (!update(state)) return false;
+    undo.push(previous);
+    redo = [];
+    if (undo.length > 40) undo.shift();
+    persist();
+    return true;
+  }
+
+  function orientation(x,y) {
+    if (y < 33) return 180;
+    if (y > 67) return 0;
+    if (x < 28) return 90;
+    if (x > 72) return -90;
+    return y < 50 ? 180 : 0;
+  }
+
+  function layoutKey() {
+    return draft.count + ':' + (draft.mode === 'host' ? draft.edge : 'player');
+  }
+
+  function layout() {
+    const custom = draft.saved[layoutKey()];
+    if (draft.free && custom) return custom;
+    let [top,bottom] = layouts[draft.count];
+    const host = draft.mode === 'host' ? edges[draft.edge] : null;
+    if (host && draft.edge === 'top') top = gapLayouts[top.length];
+    if (host && draft.edge === 'bottom') bottom = gapLayouts[bottom.length];
+    return {
+      seats:[...top.map(x => ({x,y:19,angle:180})), ...[...bottom].reverse().map(x => ({x,y:81,angle:0}))],
+      host
+    };
+  }
+
+  function clockwise(seats) {
+    const angle = p => (Math.atan2(p.y-50,p.x-50) + Math.PI * 2) % (Math.PI * 2);
+    const start = Math.PI;
+    return seats.map((p,id) => ({id,angle:(angle(p)-start+Math.PI*2)%(Math.PI*2)}))
+      .sort((a,b) => a.angle-b.angle || a.id-b.id).map(p => p.id);
+  }
+
+  function styleSeat(position, id) {
+    const positionStyle = '--x:'+position.x+'%;--y:'+position.y+'%;--angle:'+position.angle+'deg;';
+    if (id === null) return positionStyle;
+    const [bright,shade,rim] = palette[id];
+    return positionStyle+'--bright:'+bright+';--shade:'+shade+';--rim:'+rim;
+  }
+
+  function marks(count) {
+    if (!count) return '';
+    return '<span class="marks" aria-label="Банкротств: '+count+'">' +
+      '<span class="mark" aria-hidden="true"></span>'.repeat(Math.min(4,count))+(count>4?'<span>×'+count+'</span>':'')+'</span>';
+  }
+
+  function seat(position, id, options = {}) {
+    const {setup=false, dealer=false, first=false, active=false, movable=false, player=null, item=null, waiting=false} = options;
+    const host = id === null;
+    const classes = ['seat',host&&'host-seat',setup&&'setup-seat',movable&&'movable',active&&'active',item?.fold&&'folded',waiting&&'waiting'].filter(Boolean).join(' ');
+    const label = host?'Крупье':playerName(id)+(dealer?', крупье':'')+(player?', баланс '+player.balance:'');
+    const number = player ? fmt(player.balance) : '';
+    const info = waiting ? '⌛' : item?.fold ? 'Пас' : player?.balance===0 && item ? 'Ва-банк' : item ? '≡ '+fmt(item.street) : '';
+    const face = host ? '<span class="seat-id">К</span><span>Крупье</span>' :
+      '<span class="seat-id">'+names[id]+'</span>'+
+      (player?'<span class="balance '+(number.length>4?'long':'')+'">'+number+'</span>':'')+
+      (info?'<span class="wager">'+info+'</span>':'')+
+      (dealer?'<span class="dealer-tag" aria-hidden="true">К</span>':'')+
+      (first?'<span class="first-tag" aria-label="Первое слово">◆</span>':'')+marks(player?.busts||0);
+    return '<button type="button" class="'+classes+'" style="'+styleSeat(position,id)+'" aria-label="'+label+'" data-action="'+(setup?'setup-seat':'game-seat')+'" data-seat="'+(host?'host':id)+'"'+
+      (setup&&!host&&draft.mode==='player'?' aria-pressed="'+dealer+'"':'')+'><span class="seat-face">'+face+'</span></button>';
+  }
+
+  function header(title) {
+    return '<header class="header"><div><div class="brand">♠ &nbsp; POKER COMPANION</div><h1>'+title+'</h1></div></header>';
+  }
+
+  function setup() {
+    const positions = layout();
+    const counts = Object.keys(layouts).map(n => control('count',n,'','data-count="'+n+'" aria-pressed="'+(Number(n)===draft.count)+'"')).join('');
+    const dealerOptions = names.slice(0,draft.count).map((name,id)=>'<option value="'+id+'"'+selected(draft.dealer,id)+'>Игрок '+name+'</option>').join('');
+    const edgeOptions = Object.entries(edges).map(([id,p])=>'<option value="'+id+'"'+selected(draft.edge,id)+'>'+p.name+'</option>').join('');
+    const seats = positions.seats.map((position,id) => seat(position,id,{setup:true,dealer:draft.mode==='player'&&id===draft.dealer,movable:draft.free})).join('');
+    const host = positions.host ? seat(positions.host,null,{setup:true,movable:draft.free}) : '';
+    return '<section class="shell">'+header('Настройка стола')+
+      '<div class="setup-grid"><div class="settings">'+
+      '<fieldset><legend>Игроков</legend><div class="count">'+counts+'</div></fieldset>'+
+      '<label class="field">Роль крупье<select id="dealer-mode"><option value="player"'+selected(draft.mode,'player')+'>Играет</option><option value="host"'+selected(draft.mode,'host')+'>Только ведёт игру</option></select></label>'+
+      (draft.mode==='player'?'<label class="field">Кто крупье<select id="dealer-player">'+dealerOptions+'</select></label>':'<label class="field">Сторона крупье<select id="dealer-edge">'+edgeOptions+'</select></label>')+
+      '<label class="checkbox"><input id="free-seating" type="checkbox" '+(draft.free?'checked':'')+'> Свободная посадка</label></div>'+
+      boardMarkup('<div class="center"><span class="pot-label">БАНК</span><span class="pot">0</span></div>'+seats+host)+'</div>'+
+      '<div class="footer">'+(state?control('resume-back','Назад','ghost'):'<span></span>')+control('rules','Далее →','primary')+'</div></section>';
+  }
+
+  function rules() {
+    return '<section class="shell narrow">'+header('Настройки игры')+
+      '<form id="game-settings" class="card"><div class="field-pair">'+
+      '<label class="field">Стартовый баланс<input required type="number" name="stack" inputmode="numeric" min="1" max="99999" step="1" value="'+draft.stack+'"></label>'+
+      '<label class="field">Взнос с каждого<input required type="number" name="ante" inputmode="numeric" min="0" max="99999" step="1" value="'+draft.ante+'"></label></div>'+
+      '<p id="rules-error" class="error" role="alert"></p><div class="footer">'+control('setup-back','Назад','ghost')+
+      '<button class="primary" type="submit">Начать сессию</button></div></form></section>';
+  }
+
+  function resume() {
+    return '<section class="shell narrow">'+header('Poker Companion')+
+      '<div class="card"><p class="muted">'+state.players.length+' игроков · '+(state.hand?'Раздача '+state.number+' · '+streetLabels[state.hand.street]:'Сыграно раздач: '+state.number)+'</p>'+
+      '<div class="row" style="margin-top:12px">'+control('continue','Продолжить','primary')+control('new','Новая сессия','ghost')+'</div></div></section>';
+  }
+
+  function standings() {
+    const rows = Poker.standings(state).map(row=>'<tr><td>'+row.place+'</td><td><span class="dot" style="background:'+palette[row.id][2]+'"></span>'+names[row.id]+'</td><td>'+fmt(row.balance)+'</td><td>'+row.busts+'</td><td>'+fmt(row.score)+'</td></tr>').join('');
+    return '<section class="shell narrow">'+header('Итоги сессии')+
+      '<table class="results"><thead><tr><th>Место</th><th>Игрок</th><th>Баланс</th><th>Метки</th><th>Итог</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div class="footer">'+control('new','Изменить настройки','ghost')+control('replay','Новая с теми же настройками','primary')+'</div></section>';
+  }
+
+  function tableActions() {
+    const h = state.hand;
+    const phase = h ? streetLabels[h.street]+' · Раздача '+state.number : '';
+    if (h?.phase === 'bet' && panel) {
+      const id = h.current;
+      const e = Poker.entry(h,id), p = state.players[id], need = Poker.due(h,e);
+      const canRaise = Poker.survivors(h).some(other=>other.id!==id&&state.players[other.id].balance>0);
+      const maximum = p.balance+e.street;
+      const title = '<div class="action-head"><strong>'+playerName(id)+'</strong><span class="phase">'+phase+'</span>'+control('close-panel','×','','aria-label="Свернуть действия"')+'</div>';
+      if (panel === 'raise' && canRaise && maximum>h.target) {
+        const min = h.target+1;
+        return '<div class="dock-actions action-panel">'+title+
+          '<form id="raise-form"><div class="raise-line"><label for="raise-amount">До</label><input id="raise-amount" name="amount" type="number" inputmode="numeric" required min="'+min+'" max="'+maximum+'" step="1" value="'+min+'" data-paid="'+e.street+'"><button class="primary" type="submit">'+(h.target?'Рейз':'Ставка')+'</button></div><span class="phase" id="raise-due">Списать '+fmt(min-e.street)+'</span></form></div>';
+      }
+      const buttons = [
+        control('fold','Пас','ghost'),
+        need === 0 ? control('check','Чек','primary') :
+          p.balance>=need ? control('call','Колл '+fmt(need),'primary') : control('all','Ва-банк '+fmt(p.balance),'primary'),
+        canRaise && maximum>h.target ? control('raise',h.target?'Повысить…':'Поставить…') : '',
+        canRaise && p.balance>need ? control('all','Ва-банк') : ''
+      ];
+      const group = h.pending.length > 1 && h.pending.every(other=>{
+        const remaining = Poker.due(h,Poker.entry(h,other));
+        return need ? remaining>0&&remaining<=state.players[other].balance : remaining===0;
+      });
+      return '<div class="dock-actions action-panel">'+title+
+        '<div class="action-grid">'+buttons.join('')+'</div>'+
+        (group?control('group-'+(need?'call':'check'),need?'Оставшиеся — колл':'Оставшиеся — чек','group'):'')+'</div>';
+    }
+
+    let action = '', status = phase;
+    if (!h) {
+      if (state.result) {
+        const result = state.result;
+        status = result.payouts.map(({id,amount})=>names[id]+' +'+fmt(amount)).join(' · ');
+        if (result.burned) status += ' · −'+fmt(result.burned)+' из банка';
+      }
+      action = control('start-hand',state.number?'Следующая раздача':'Начать раздачу','primary round-button');
+    } else if (h.phase === 'break') {
+      action = control('next-street',nextLabels[h.street+1],'primary round-button');
+    } else if (h.phase === 'runout') {
+      action = control('next-street','Все карты открыты','primary round-button');
+    } else if (h.phase === 'award' || h.phase === 'showdown') {
+      action = control('choose-winners',h.phase==='award'?'Подтвердить выплату':'Выбрать победителя','primary round-button');
+    } else {
+      action = control('open-panel',playerName(h.current)+' · ход','ghost round-button');
+    }
+    return '<div class="dock-actions">'+(status?'<span class="phase">'+status+'</span>':'')+action+'</div>';
+  }
+
+  function game() {
+    const settings = state.settings, h = state.hand;
+    const dealerPosition = settings.mode==='host' ? settings.host : settings.seats[settings.dealer];
+    const seats = settings.seats.map((position,id)=>seat(position,id,{
+      dealer:settings.mode==='player'&&id===settings.dealer, first:h?.starter===id, active:h?.current===id,
+      player:state.players[id], item:h&&Poker.entry(h,id), waiting:state.players[id].returnAt>0
+    })).join('');
+    const host = settings.host ? seat(settings.host,null) : '';
+    const facingTop = dealerPosition.angle===180;
+    const pot = '<div class="center game-pot" style="--dealer-angle:'+dealerPosition.angle+'deg" aria-label="Банк">'+
+      '<span class="pot-label">БАНК</span><span class="pot">'+fmt(h?Poker.bank(h):0)+'</span></div>';
+    const tools = '<div class="tools" role="group" aria-label="Управление сессией">'+
+      control('undo','↶','icon ghost','aria-label="Отменить последнее действие" title="Отменить" '+(undo.length?'':'disabled'))+
+      control('redo','↷','icon ghost','aria-label="Вернуть отменённое действие" title="Вернуть" '+(redo.length?'':'disabled'))+
+      control('menu','⋯','icon ghost','aria-label="Меню сессии" title="Меню"')+'</div>';
+    const dock = '<div class="game-dock">'+tableActions()+tools+'</div>';
+    return '<section class="game'+(facingTop?' dealer-top':'')+'">'+dock+boardMarkup(seats+host+pot)+'</section>';
+  }
+
+  function render() {
+    app.innerHTML = ({setup,rules,resume,results:standings,game})[view]();
+    if (view === 'game') document.body.classList.add('at-table');
+    else document.body.classList.remove('at-table');
+  }
+
+  function openModal(type, title, content) {
+    modalType = type;
+    dialog.innerHTML = '<h2>'+title+'</h2>'+content;
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function dismiss() {
+    modalType = '';
+    if (dialog.open) dialog.close();
+  }
+
+  function confirm(type, title, message, action, label) {
+    openModal(type,title,'<p>'+message+'</p><div class="footer">'+
+      control('close-modal','Отмена','ghost','autofocus')+control(action,label,'danger')+'</div>');
+    dialog.querySelector('[autofocus]').focus();
+  }
+
+  function selectWinners() {
+    const h = state.hand;
+    const eligible = Poker.survivors(h);
+    if (h.phase==='award') winnerSelection = [eligible[0].id];
+    const options = h.phase==='showdown' ? '<div class="winner-list">'+eligible.map(({id})=>
+      control('winner',names[id],'','data-id="'+id+'" aria-label="'+playerName(id)+'" aria-pressed="'+winnerSelection.includes(id)+'"')).join('')+'</div>' : '';
+    const pay = Poker.calculate(h,winnerSelection);
+    const payouts = pay ? '<div class="payouts">'+pay.payouts.map(({id,amount})=>'<span>'+playerName(id)+' <strong>+'+fmt(amount)+'</strong></span>').join('')+
+      (pay.burned?'<span>Сгорит <strong>'+fmt(pay.burned)+'</strong></span>':'')+'</div>' : '';
+    openModal('winner',h.phase==='award'?'Выплата':'Кто выиграл?',options+payouts+
+      '<div class="footer">'+control('close-modal','Назад','ghost')+control('settle','Выплатить','primary',pay?'':'disabled')+'</div>');
+  }
+
+  function showSeat(id) {
+    const p = state.players[id], e = state.hand&&Poker.entry(state.hand,id);
+    const status = p.returnAt ? 'Пропускает раздачу' : e?.fold ? 'Пас' : e && p.balance===0 ? 'Ва-банк' : '';
+    openModal('seat',playerName(id),'<p>Баланс <strong>'+fmt(p.balance)+'</strong>'+(status?' · '+status:'')+'</p>'+
+      (e?'<p class="muted">В этих торгах '+fmt(e.street)+' · за раздачу '+fmt(e.total)+'</p>':'')+
+      (p.busts?'<p class="muted">Банкротств '+p.busts+'</p>':'')+'<div class="footer">'+control('close-modal','Готово','ghost')+'</div>');
+  }
+
+  function newSession(settings) {
+    state = Poker.initialState(settings);
+    draft = freshDraft(settings);
+    undo = [];
+    redo = [];
+    panel = '';
+    view = 'game';
+    persist();
+    render();
+  }
+
+  function retainRules(form) {
+    const stack = Number(form.elements.stack.value), ante = Number(form.elements.ante.value);
+    if (form.elements.stack.value && Number.isInteger(stack)&&stack>=1&&stack<=99999) draft.stack = stack;
+    if (form.elements.ante.value && Number.isInteger(ante)&&ante>=0&&ante<=99999) draft.ante = ante;
+  }
+
+  function play(kind, target) {
+    if (!change(s=>Poker.action(s,kind,target))) return;
+    panel = state.hand.phase==='bet'?'actions':'';
+    render();
+  }
+
+  function onCommand(button) {
+    const command = button.dataset.action;
+    if (command==='count') {
+      draft.count = Number(button.dataset.count);
+      draft.dealer = Math.min(draft.dealer,draft.count-1);
+    } else if (command==='setup-seat') {
+      if (draft.mode!=='player'||button.dataset.seat==='host') return;
+      draft.dealer = Number(button.dataset.seat);
+    } else if (command==='rules') view='rules';
+    else if (command==='setup-back') {
+      retainRules(app.querySelector('form'));
+      view='setup';
+    } else if (command==='resume-back') view=state.ended?'results':'resume';
+    else if (command==='continue') view='game';
+    else if (command==='new') {
+      if (state && !state.ended) {
+        confirm('new','Начать новую сессию?','Когда начнёшь новую сессию, текущие результаты будут заменены.','new-confirm','К настройкам');
+        return;
+      }
+      draft=freshDraft(state?.settings);
+      view='setup';
+    } else if (command==='new-confirm') {
+      dismiss();
+      draft=freshDraft(state.settings);
+      view='setup';
+    } else if (command==='replay') {
+      newSession(state.settings);
+      return;
+    } else if (command==='start-hand') {
+      if (!change(Poker.start)) return;
+      panel='';
+      const ids=state.hand.returning;
+      if(ids.length)tell('Возвращаются: '+ids.map(id=>names[id]).join(', '));
+    } else if (command==='game-seat') {
+      if(button.dataset.seat==='host') { onCommand({dataset:{action:'menu'}});return; }
+      const id=Number(button.dataset.seat);
+      if (state.hand?.current===id) panel=panel?'':'actions';
+      else {showSeat(id);return;}
+    } else if (command==='open-panel') panel='actions';
+    else if (command==='close-panel') panel=panel==='raise'?'actions':'';
+    else if (command==='raise') panel='raise';
+    else if (['check','call','fold','all'].includes(command)) {play(command);return;}
+    else if (command==='group-check'||command==='group-call') {
+      if(!change(s=>Poker.group(s,command.slice(6))))return;
+      panel='';
+    } else if (command==='next-street') {
+      if (!change(Poker.nextStreet))return;
+      panel='';
+    } else if (command==='undo') {
+      if (!undo.length)return;
+      redo.push(state);
+      state=undo.pop();
+      panel='';
+      persist();
+      tell('Последнее действие отменено');
+    } else if (command==='redo') {
+      if (!redo.length)return;
+      undo.push(state);
+      state=redo.pop();
+      panel='';
+      persist();
+      tell('Действие возвращено');
+    } else if (command==='menu') {
+      openModal('menu','Сессия','<p class="muted">'+(state.hand?'Раздача '+state.number:'Сыграно раздач: '+state.number)+'</p>'+
+        '<div class="footer">'+control('close-modal','К столу','ghost')+
+        control('end-ask','Завершить сессию','danger')+'</div>');
+      return;
+    } else if (command==='end-ask') {
+      const message = state.hand
+        ? 'Текущая раздача отменится. Ставки и взносы вернутся игрокам, а в итогах будут учтены только завершённые раздачи.'
+        : 'Игра закончится, и откроются итоговые результаты.';
+      confirm('end','Завершить сессию?',message,'end','Завершить сессию');
+      return;
+    } else if (command==='end') {
+      if(modalType!=='end'||!Poker.end(state))return;
+      dismiss();
+      undo=[];
+      redo=[];
+      persist();
+      view='results';
+    } else if (command==='choose-winners') {
+      winnerSelection=[];
+      selectWinners();
+      return;
+    } else if (command==='winner') {
+      const id=Number(button.dataset.id);
+      winnerSelection=winnerSelection.includes(id)?winnerSelection.filter(value=>value!==id):[...winnerSelection,id];
+      selectWinners();
+      dialog.querySelector('[data-id="'+id+'"]')?.focus();
+      return;
+    } else if (command==='settle') {
+      if(!change(s=>Poker.settle(s,winnerSelection)))return;
+      dismiss();
+      panel='';
+    } else if (command==='close-modal') {dismiss();return;}
+    else return;
+    render();
+    if(command==='raise')app.querySelector('#raise-amount')?.select();
+    if(command==='setup-seat')app.querySelector('[data-seat="'+draft.dealer+'"]')?.focus();
+  }
+
+  document.addEventListener('click',event=>{
+    const button=event.target.closest('button[data-action]');
+    if(!button||button.disabled)return;
+    if(button===draggedSeat&&event.detail!==0)return;
+    onCommand(button);
+  });
+  dialog.addEventListener('close',()=>{if(!dialog.open)modalType='';});
+
+  app.addEventListener('change',event=>{
+    const input=event.target;
+    if(input.id==='dealer-mode')draft.mode=input.value;
+    else if(input.id==='dealer-player')draft.dealer=Number(input.value);
+    else if(input.id==='dealer-edge')draft.edge=input.value;
+    else if(input.id==='free-seating')draft.free=input.checked;
+    else return;
+    render();
+    app.querySelector('#'+input.id)?.focus();
+  });
+
+  app.addEventListener('input',event=>{
+    if(event.target.id!=='raise-amount')return;
+    const input=event.target;
+    app.querySelector('#raise-due').textContent=input.validity.valid?'Списать '+fmt(Number(input.value)-Number(input.dataset.paid)):'От '+fmt(input.min)+' до '+fmt(input.max);
+  });
+
+  app.addEventListener('submit',event=>{
+    event.preventDefault();
+    const form=event.target;
+    if(form.id==='raise-form'){play('raise',Number(form.elements.amount.value));return;}
+    if(form.id!=='game-settings')return;
+    retainRules(form);
+    if(draft.ante>draft.stack){
+      app.querySelector('#rules-error').textContent='Обязательный взнос не может быть больше стартового баланса.';
+      return;
+    }
+    const {seats,host}=layout();
+    newSession({seats,host,order:clockwise(seats),mode:draft.mode,dealer:draft.dealer,
+      edge:draft.edge,free:draft.free,layoutKey:layoutKey(),stack:draft.stack,ante:draft.ante});
+  });
+
+  function clampPoint(x,y,board,element) {
+    const radius=element.offsetWidth/2+5;
+    const mx=radius*100/board.clientWidth, my=radius*100/board.clientHeight;
+    x=Math.max(mx,Math.min(100-mx,x));
+    y=Math.max(my,Math.min(100-my,y));
+    return {x,y,angle:orientation(x,y)};
+  }
+
+  function isFree(point, id, board, element) {
+    const data=layout();
+    const width=board.clientWidth, height=board.clientHeight;
+    const distance=(p)=>Math.hypot((p.x-point.x)*width/100,(p.y-point.y)*height/100);
+    const space=element.offsetWidth+5;
+    return distance({x:50,y:50})>=element.offsetWidth/2+29 &&
+      data.seats.every((p,index)=>id===index || distance(p)>=space) &&
+      (!data.host||id==='host'||distance(data.host)>=space);
+  }
+
+  function nearestFree(point, id, board, element, fallback) {
+    if (isFree(point,id,board,element)) return point;
+    for (let radius=5;radius<Math.max(board.clientWidth,board.clientHeight);radius+=5) {
+      for (let turn=0;turn<16;turn++) {
+        const angle=turn*Math.PI/8;
+        const candidate=clampPoint(point.x+100*radius*Math.cos(angle)/board.clientWidth,
+          point.y+100*radius*Math.sin(angle)/board.clientHeight,board,element);
+        if (isFree(candidate,id,board,element)) return candidate;
+      }
+    }
+    return fallback;
+  }
+
+  function showPosition(element,p) {
+    element.style.setProperty('--x',p.x+'%');
+    element.style.setProperty('--y',p.y+'%');
+    element.style.setProperty('--angle',p.angle+'deg');
+  }
+
+  function savePosition(id,point) {
+    const data=Poker.copy(layout());
+    if(id==='host')data.host=point;
+    else data.seats[id]=point;
+    draft.saved[layoutKey()]=data;
+  }
+
+  app.addEventListener('pointerdown',event=>{
+    draggedSeat=null;
+    const element=event.target.closest('.movable');
+    if(!element||event.button!==0||drag)return;
+    const id=element.dataset.seat==='host'?'host':Number(element.dataset.seat);
+    const data=layout(), start=id==='host'?data.host:data.seats[id];
+    drag={element,id,start,board:element.closest('.board'),pointer:event.pointerId,x:event.clientX,y:event.clientY};
+    element.setPointerCapture(event.pointerId);
+  });
+
+  function dragPoint(d,event){
+    return clampPoint(d.start.x+100*(event.clientX-d.x)/d.board.clientWidth,
+      d.start.y+100*(event.clientY-d.y)/d.board.clientHeight,d.board,d.element);
+  }
+
+  app.addEventListener('pointermove',event=>{
+    if(!drag||drag.pointer!==event.pointerId)return;
+    if(!drag.moved&&Math.hypot(event.clientX-drag.x,event.clientY-drag.y)<3)return;
+    drag.moved=true;
+    const point=dragPoint(drag,event);
+    showPosition(drag.element,point);
+    drag.element.classList.add('dragging');
+    drag.element.classList.toggle('clashing',!isFree(point,drag.id,drag.board,drag.element));
+  });
+
+  function stopDrag(event) {
+    if(!drag||event.pointerId!==drag.pointer)return;
+    const d=drag;
+    drag=null;
+    let point=d.start;
+    if(d.moved&&event.type==='pointerup'){
+      draggedSeat=d.element;
+      point=nearestFree(dragPoint(d,event),d.id,d.board,d.element,d.start);
+      savePosition(d.id,point);
+    }
+    showPosition(d.element,point);
+    d.element.classList.remove('dragging','clashing');
+  }
+
+  for(const type of ['pointerup','pointercancel','lostpointercapture'])app.addEventListener(type,stopDrag);
+  app.addEventListener('keydown',event=>{
+    const element=event.target.closest('.movable');
+    const delta={ArrowLeft:[-3,0],ArrowRight:[3,0],ArrowUp:[0,-3],ArrowDown:[0,3]}[event.key];
+    if(!element||!delta)return;
+    event.preventDefault();
+    const id=element.dataset.seat==='host'?'host':Number(element.dataset.seat);
+    const data=layout(),start=id==='host'?data.host:data.seats[id],board=element.closest('.board');
+    const point=clampPoint(start.x+delta[0],start.y+delta[1],board,element);
+    if(isFree(point,id,board,element)){
+      savePosition(id,point);
+      showPosition(element,point);
+    }
+  });
+
+  render();
+  if(!storageOK)tell('Не удалось прочитать сохранённую сессию.',true);
+})();
+</script>
+</body>
+</html>
